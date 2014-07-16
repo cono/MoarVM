@@ -165,6 +165,7 @@ OBJECTS = src/core/callsite@obj@ \
           src/strings/ops@obj@ \
           src/strings/unicode@obj@ \
           src/strings/latin1@obj@ \
+          src/strings/latin2@obj@ \
           src/strings/utf16@obj@ \
           src/strings/windows1252@obj@ \
           src/math/bigintops@obj@ \
@@ -286,6 +287,7 @@ HEADERS = src/moar.h \
           src/strings/ops.h \
           src/strings/unicode.h \
           src/strings/latin1.h \
+          src/strings/latin2.h \
           src/strings/utf16.h \
           src/strings/windows1252.h \
           src/math/bigintops.h \

@@ -613,6 +613,8 @@ MVMString * MVM_string_decode(MVMThreadContext *tc,
             return MVM_string_ascii_decode(tc, type_object, Cbuf, byte_length);
         case MVM_encoding_type_latin1:
             return MVM_string_latin1_decode(tc, type_object, Cbuf, byte_length);
+        case MVM_encoding_type_latin2:
+            return MVM_string_latin2_decode(tc, type_object, Cbuf, byte_length);
         case MVM_encoding_type_utf16:
             return MVM_string_utf16_decode(tc, type_object, Cbuf, byte_length);
         case MVM_encoding_type_windows1252:
@@ -632,6 +634,8 @@ MVMuint8 * MVM_string_encode(MVMThreadContext *tc, MVMString *s, MVMint64 start,
             return MVM_string_ascii_encode_substr(tc, s, output_size, start, length);
         case MVM_encoding_type_latin1:
             return MVM_string_latin1_encode_substr(tc, s, output_size, start, length);
+        case MVM_encoding_type_latin2:
+            return MVM_string_latin2_encode_substr(tc, s, output_size, start, length);
         case MVM_encoding_type_utf16:
             return MVM_string_utf16_encode_substr(tc, s, output_size, start, length);
         case MVM_encoding_type_windows1252:
@@ -1432,6 +1436,7 @@ static MVMint16   encoding_name_init         = 0;
 static MVMString *encoding_utf8_name         = NULL;
 static MVMString *encoding_ascii_name        = NULL;
 static MVMString *encoding_latin1_name       = NULL;
+static MVMString *encoding_latin2_name       = NULL;
 static MVMString *encoding_utf16_name        = NULL;
 static MVMString *encoding_windows1252_name  = NULL;
 MVMuint8 MVM_string_find_encoding(MVMThreadContext *tc, MVMString *name) {
@@ -1443,6 +1448,8 @@ MVMuint8 MVM_string_find_encoding(MVMThreadContext *tc, MVMString *name) {
         MVM_gc_root_add_permanent(tc, (MVMCollectable **)&encoding_ascii_name);
         encoding_latin1_name      = MVM_string_ascii_decode_nt(tc, tc->instance->VMString, "iso-8859-1");
         MVM_gc_root_add_permanent(tc, (MVMCollectable **)&encoding_latin1_name);
+        encoding_latin2_name      = MVM_string_ascii_decode_nt(tc, tc->instance->VMString, "iso-8859-2");
+        MVM_gc_root_add_permanent(tc, (MVMCollectable **)&encoding_latin2_name);
         encoding_utf16_name       = MVM_string_ascii_decode_nt(tc, tc->instance->VMString, "utf16");
         MVM_gc_root_add_permanent(tc, (MVMCollectable **)&encoding_utf16_name);
         encoding_windows1252_name = MVM_string_ascii_decode_nt(tc, tc->instance->VMString, "windows-1252");
@@ -1459,6 +1466,9 @@ MVMuint8 MVM_string_find_encoding(MVMThreadContext *tc, MVMString *name) {
     }
     else if (MVM_string_equal(tc, name, encoding_latin1_name)) {
         return MVM_encoding_type_latin1;
+    }
+    else if (MVM_string_equal(tc, name, encoding_latin2_name)) {
+        return MVM_encoding_type_latin2;
     }
     else if (MVM_string_equal(tc, name, encoding_utf16_name)) {
         return MVM_encoding_type_utf16;

@@ -127,6 +127,7 @@ typedef double   MVMnum64;
 #include "strings/unicode_gen.h"
 #include "strings/unicode.h"
 #include "strings/latin1.h"
+#include "strings/latin2.h"
 #include "strings/windows1252.h"
 #include "io/io.h"
 #include "io/eventloop.h"
