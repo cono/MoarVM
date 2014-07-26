@@ -124,7 +124,6 @@ sub parse_ops($file) {
 
         Op::Line.parse($line)
             or die "Couldn't parse line '$line'";
-
     }
 }
 
