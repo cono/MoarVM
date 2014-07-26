@@ -25,7 +25,7 @@ sub MAIN($file = "src/core/oplist") {
     $hf.say("#define MVM_OP_EXT_BASE $EXT_BASE");
     $hf.say("#define MVM_OP_EXT_CU_LIMIT $EXT_CU_LIMIT");
     $hf.say('');
-    $hf.say('MVMOpInfo * MVM_op_get_op(unsigned short op);');
+    $hf.say('MVM_PUBLIC MVMOpInfo * MVM_op_get_op(unsigned short op);');
     $hf.close;
 
     # Generate C file
@@ -82,8 +82,8 @@ sub parse_ops($file) {
 
             # Look for operands that are actually adverbs.
             my %adverbs;
-            while @operands && @operands[*-1] ~~ /^ ':' (\w+) $/ {
-                %adverbs{$0} = 1;
+            while @operands && @operands[*-1] ~~ /^ ':' (\w+) [ '(' (<-[)]>+) ')' ]? $/ {
+                %adverbs{$0} = $1 || 1;
                 @operands.pop;
             }
 
@@ -201,14 +201,35 @@ sub opcode_details(@ops) {
                 ($op.adverbs<osrpoint> ?? 4 !! 0)),";
             take "        $($op.adverbs<noinline> ?? '1' !! '0'),";
             if $op.operands {
-                take "        \{ $op.operands.map(&operand_flags).join(', ') }";
+                take "        \{ $op.operands.map(&operand_flags).join(', ') },";
             }
-            #else { take "        \{ }"; }
+            else { take "        \{ 0 },"; }
+            if $op.adverbs<esc> -> $esc_info {
+                take escape_info($esc_info);
+            }
+            else { take "        \{ 0 }"; }
             take "    },"
         }
         take "};\n";
         take "static unsigned short MVM_op_counts = {+@ops};\n";
     }
+}
+
+sub escape_info($info) {
+    sub flag($_) {
+        when '-' { 'MVM_ESCAPE_IRR' }
+        when 'y' { 'MVM_ESCAPE_YES' }
+        when 'n' { 'MVM_ESCAPE_NO' }
+        when /into '[' (\d+) ']'/ {
+            'MVM_ESCAPE_INTO + ' ~ ($0 +< 3)
+        }
+        when /outof '[' (\d+) ']'/ {
+            'MVM_ESCAPE_OUTOF + ' ~ ($0 +< 3)
+        }
+        default { die "Unknown escape flag $_" }
+    }
+    return "        \{ $( $_ ?? .map(&flag).join(', ') !! '0' ) }"
+        given $info.split(',');
 }
 
 # Figures out the various flags for an operand type.
